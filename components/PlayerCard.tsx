@@ -1,6 +1,8 @@
+import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 
 interface Player {
+  id: number
   name: string
   overall: number
   chute: number
@@ -10,40 +12,45 @@ interface Player {
 
 export default function PlayerCard({ player }: { player: Player }) {
   return (
-    <Card className="w-64 bg-green-700 text-white">
+    <Link href={`/jogadores/${player.id}`}>
 
-      <CardContent className="p-6 text-center">
+      <Card className="w-64 bg-green-700 text-white cursor-pointer hover:scale-105 transition">
 
-        <div className="text-5xl">
-          ⚽
-        </div>
+        <CardContent className="p-6 text-center">
 
-        <h2 className="text-2xl font-bold mt-4">
-          {player.name}
-        </h2>
+          <div className="text-5xl">
+            ⚽
+          </div>
 
-        <div className="text-5xl font-bold mt-3">
-          {player.overall}
-        </div>
+          <h2 className="text-2xl font-bold mt-4">
+            {player.name}
+          </h2>
 
-        <div className="mt-5 space-y-2 text-left">
+          <div className="text-5xl font-bold mt-3">
+            {player.overall}
+          </div>
 
-          <p>
-            🥅 Chute: {player.chute}
-          </p>
 
-          <p>
-            🎯 Passe: {player.passe}
-          </p>
+          <div className="mt-5 space-y-2 text-left">
 
-          <p>
-            💪 Físico: {player.fisico}
-          </p>
+            <p>
+              🥅 Chute: {player.chute}
+            </p>
 
-        </div>
+            <p>
+              🎯 Passe: {player.passe}
+            </p>
 
-      </CardContent>
+            <p>
+              💪 Físico: {player.fisico}
+            </p>
 
-    </Card>
+          </div>
+
+        </CardContent>
+
+      </Card>
+
+    </Link>
   )
 }
