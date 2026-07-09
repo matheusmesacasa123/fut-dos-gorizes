@@ -1,68 +1,173 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { supabase } from "@/lib/supabase";
+import { Card } from "@/components/ui/card";
 
-export default function Home() {
+
+export default async function Home() {
+
+
+  const { data: players, error } = await supabase
+    .from("jogadores")
+    .select("*");
+
+
+
+  if (error) {
+
+    console.log("Erro ao buscar jogadores:", error);
+
+  }
+
+
+
+  const totalJogadores = players?.length ?? 0;
+
+
+
+  const melhorOverall = players?.length
+    ? players.reduce((a, b) =>
+        a.overall > b.overall ? a : b
+      )
+    : null;
+
+
+
+  const maiorChute = players?.length
+    ? players.reduce((a, b) =>
+        a.chute > b.chute ? a : b
+      )
+    : null;
+
+
+
+  const melhorPasse = players?.length
+    ? players.reduce((a, b) =>
+        a.passe > b.passe ? a : b
+      )
+    : null;
+
+
+
+  const melhorFisico = players?.length
+    ? players.reduce((a, b) =>
+        a.fisico > b.fisico ? a : b
+      )
+    : null;
+
+
+
   return (
+
     <main className="min-h-screen bg-zinc-100 p-8">
-      <div className="mx-auto max-w-5xl">
 
-        <h1 className="text-4xl font-bold">
-          ⚽ Fut dos Gorizes
-        </h1>
 
-        <p className="text-zinc-500 mt-2">
-          Organize suas partidas de futebol.
-        </p>
+      <h1 className="text-5xl font-bold mb-10">
+        ⚽ Fut dos Gorizes
+      </h1>
 
-        <div className="grid md:grid-cols-2 gap-6 mt-8">
 
-          <Card>
-            <CardHeader>
-              <CardTitle>📅 Próxima Pelada</CardTitle>
-            </CardHeader>
 
-            <CardContent>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-              <p><b>Data:</b> Quinta-feira</p>
 
-              <p><b>Horário:</b> 20:00</p>
+        <Card className="p-6">
 
-              <p><b>Local:</b> Arena Society</p>
+          <h2 className="text-xl font-bold">
+            👥 Jogadores
+          </h2>
 
-              <p><b>Valor:</b> R$25</p>
+          <p className="text-4xl mt-4 font-bold">
+            {totalJogadores}
+          </p>
 
-              <Button className="mt-6 w-full">
-                Confirmar Presença
-              </Button>
+        </Card>
 
-            </CardContent>
-          </Card>
 
-          <Card>
 
-            <CardHeader>
 
-              <CardTitle>
-                🏆 Ranking
-              </CardTitle>
+        <Card className="p-6">
 
-            </CardHeader>
+          <h2 className="text-xl font-bold">
+            ⭐ Melhor Overall
+          </h2>
 
-            <CardContent>
 
-              <p>🥇 João - 87</p>
+          <p className="text-2xl mt-4 font-bold">
 
-              <p>🥈 Pedro - 85</p>
+            {melhorOverall
+              ? `${melhorOverall.nome} - ${melhorOverall.overall}`
+              : "Nenhum"}
 
-              <p>🥉 Matheus - 84</p>
+          </p>
 
-            </CardContent>
+        </Card>
 
-          </Card>
 
-        </div>
+
+
+        <Card className="p-6">
+
+          <h2 className="text-xl font-bold">
+            ⚽ Melhor Chute
+          </h2>
+
+
+          <p className="text-2xl mt-4 font-bold">
+
+            {maiorChute
+              ? `${maiorChute.nome} - ${maiorChute.chute}`
+              : "Nenhum"}
+
+          </p>
+
+        </Card>
+
+
+
+
+        <Card className="p-6">
+
+          <h2 className="text-xl font-bold">
+            🎯 Melhor Passe
+          </h2>
+
+
+          <p className="text-2xl mt-4 font-bold">
+
+            {melhorPasse
+              ? `${melhorPasse.nome} - ${melhorPasse.passe}`
+              : "Nenhum"}
+
+          </p>
+
+        </Card>
+
 
       </div>
+
+
+
+      <Card className="mt-8 p-6">
+
+
+        <h2 className="text-2xl font-bold mb-4">
+          💪 Maior físico
+        </h2>
+
+
+        <p className="text-xl">
+
+          {melhorFisico
+            ? `${melhorFisico.nome} - ${melhorFisico.fisico}`
+            : "Nenhum"}
+
+        </p>
+
+
+      </Card>
+
+
+
     </main>
-  )
+
+  );
 }

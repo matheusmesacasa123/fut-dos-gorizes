@@ -1,68 +1,261 @@
-import { players } from "@/data/players"
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
 
-export default async function PlayerProfile({
+import DeletePlayerButton from "@/components/DeletePlayerButton";
+
+
+export default async function PerfilJogador({
+
   params,
+
 }: {
-  params: Promise<{ id: string }>
+
+  params: Promise<{ id: string }>;
+
 }) {
 
-  const { id } = await params
 
-  const player = players.find(
-    (p) => p.id === Number(id)
-  )
+  const { id } = await params;
 
 
-  if (!player) {
+  const jogadorId = Number(id);
+
+
+
+  if (isNaN(jogadorId)) {
+
     return (
+
       <main className="p-8">
-        Jogador não encontrado
+
+        Jogador inválido
+
       </main>
-    )
+
+    );
+
   }
 
 
+
+
+  const { data: player, error } = await supabase
+
+    .from("jogadores")
+
+    .select("*")
+
+    .eq("id", jogadorId)
+
+    .single();
+
+
+
+
+
+  if(error || !player){
+
+    return (
+
+      <main className="p-8">
+
+        Jogador não encontrado
+
+      </main>
+
+    );
+
+  }
+
+
+
+
+
+  // VERIFICAR SE USUÁRIO LOGADO É ADMIN
+
+  const {
+
+    data: {
+      user
+    }
+
+  } = await supabase.auth.getUser();
+
+
+
+
+  let isAdmin = false;
+
+
+
+
+  if(user){
+
+
+    const {
+
+      data: jogadorLogado
+
+    } = await supabase
+
+      .from("jogadores")
+
+      .select("admin")
+
+      .eq(
+        "usuario_id",
+        user.id
+      )
+
+      .single();
+
+
+
+
+    if(jogadorLogado?.admin){
+
+      isAdmin = true;
+
+    }
+
+
+  }
+
+
+
+
+
+
+
   return (
+
     <main className="min-h-screen bg-zinc-100 p-8">
 
-      <div className="max-w-xl mx-auto bg-green-700 text-white rounded-xl p-8">
 
-        <div className="text-center">
-
-          <div className="text-6xl">
-            ⚽
-          </div>
-
-          <h1 className="text-4xl font-bold mt-4">
-            {player.name}
-          </h1>
-
-          <div className="text-6xl font-bold mt-4">
-            {player.overall}
-          </div>
-
-        </div>
+      <div className="max-w-xl mx-auto bg-white rounded-xl p-8 shadow">
 
 
-        <div className="mt-8 space-y-3 text-xl">
+
+        <h1 className="text-4xl font-bold mb-6">
+
+          {player.nome}
+
+        </h1>
+
+
+
+
+
+        {
+          player.foto_url
+          &&
+
+          <img
+
+            src={player.foto_url}
+
+            alt={player.nome}
+
+            className="
+              w-32
+              h-32
+              rounded-full
+              object-cover
+              mx-auto
+              mb-6
+            "
+
+          />
+
+        }
+
+
+
+
+
+
+
+        <div className="space-y-3 text-lg">
+
 
           <p>
-            🥅 Chute: {player.chute}
+            ⭐ Overall: {player.overall}
           </p>
+
+
+          <p>
+            ⚽ Chute: {player.chute}
+          </p>
+
 
           <p>
             🎯 Passe: {player.passe}
           </p>
 
+
           <p>
             💪 Físico: {player.fisico}
           </p>
 
+
+
         </div>
+
+
+
+
+
+
+
+
+        {
+          isAdmin
+          &&
+
+          (
+
+            <div className="flex gap-4 mt-8">
+
+
+              <Button asChild>
+
+
+                <Link href={`/jogadores/${player.id}/editar`}>
+
+                  ✏️ Editar
+
+                </Link>
+
+
+              </Button>
+
+
+
+
+
+              <DeletePlayerButton
+
+                id={player.id}
+
+              />
+
+
+
+            </div>
+
+          )
+
+        }
+
+
 
 
       </div>
 
+
     </main>
-  )
+
+  );
+
 }
