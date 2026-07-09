@@ -1,3 +1,5 @@
+import type { Player } from "@/types/player";
+
 export async function getPlayer(id: string) {
   const res = await fetch(`/api/jogadores/${id}`);
 

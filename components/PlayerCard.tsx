@@ -42,13 +42,13 @@ export default function PlayerCard({
 
   player,
 
-  isAdmin,
+  isAdmin = false,
 
 }: {
 
   player: Player;
 
-  isAdmin: boolean;
+  isAdmin?: boolean;
 
 }) {
 

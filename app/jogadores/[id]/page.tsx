@@ -218,15 +218,9 @@ export default async function PerfilJogador({
             <div className="flex gap-4 mt-8">
 
 
-              <Button asChild>
+              <Button render={<Link href={`/jogadores/${player.id}/editar`} />}>
 
-
-                <Link href={`/jogadores/${player.id}/editar`}>
-
-                  ✏️ Editar
-
-                </Link>
-
+                ✏️ Editar
 
               </Button>
 

@@ -507,33 +507,15 @@ export default async function PartidaDetalhes({
 
 
           <Button
-
-            asChild
-
             className="flex-1 h-full"
-
+            render={
+              <Link
+                href={`/partidas/${partida.id}/editar`}
+                className="w-full h-full flex justify-center items-center"
+              />
+            }
           >
-
-
-            <Link
-
-              href={`/partidas/${partida.id}/editar`}
-
-              className="
-                w-full
-                h-full
-                flex
-                justify-center
-                items-center
-              "
-
-            >
-
-              ✏️ Editar
-
-            </Link>
-
-
+            ✏️ Editar
           </Button>
 
 
