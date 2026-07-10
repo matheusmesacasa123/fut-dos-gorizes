@@ -12,6 +12,7 @@ import {
   Menu,
   Shield,
   ShieldCheck,
+  UserCog,
   UserRound,
   UsersRound,
 } from "lucide-react";
@@ -67,6 +68,12 @@ const navItems: NavItem[] = [
     href: "/admin/solicitacoes",
     label: "Solicitações",
     icon: ShieldCheck,
+    requiresAdmin: true,
+  },
+  {
+    href: "/admin/usuarios",
+    label: "Usuários",
+    icon: UserCog,
     requiresAdmin: true,
   },
 ];
