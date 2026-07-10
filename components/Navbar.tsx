@@ -57,12 +57,17 @@ const navItems = [
 ];
 
 
-export default function Navbar() {
+export default function Navbar({
+  initialUserId = null,
+}: {
+  initialUserId?: string | null;
+}) {
 
   const router = useRouter();
   const pathname = usePathname();
 
-  const [usuario, setUsuario] = useState<string | null>(null);
+  // Estado inicial vem do servidor (via layout) para não piscar em páginas logadas.
+  const [usuario, setUsuario] = useState<string | null>(initialUserId);
   const [nome, setNome] = useState("");
 
 
@@ -165,9 +170,13 @@ export default function Navbar() {
     setUsuario(null);
     setNome("");
 
-    router.push("/");
+    router.push("/login");
+    router.refresh();
 
   }
+
+  // Sem usuário logado, não mostra o header (esconde na hora ao deslogar).
+  if (!usuario) return null;
 
   const visibleNavItems = navItems.filter((item) => !item.requiresAuth || usuario);
 
