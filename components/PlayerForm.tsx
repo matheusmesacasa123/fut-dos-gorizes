@@ -651,7 +651,7 @@ export default function PlayerForm({
 
               value={posicao}
 
-              onValueChange={setPosicao}
+              onValueChange={(value) => setPosicao(value ?? "")}
 
             >
 
@@ -720,7 +720,7 @@ export default function PlayerForm({
 
               value={posicaoSecundaria}
 
-              onValueChange={setPosicaoSecundaria}
+              onValueChange={(value) => setPosicaoSecundaria(value ?? "")}
 
             >
 

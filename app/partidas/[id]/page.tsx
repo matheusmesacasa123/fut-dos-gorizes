@@ -822,7 +822,7 @@ export default async function PartidaDetalhes({
                 partidaId={partida.id}
 
 
-                jogadores={presencas as Presenca[]}
+                jogadores={presencas as unknown as Presenca[]}
 
 
 

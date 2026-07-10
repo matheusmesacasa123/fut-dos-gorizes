@@ -1,3 +1,7 @@
+// Mínimo de avaliações para o overall poder evoluir
+export const MIN_AVALIACOES_EVOLUCAO = 3;
+
+
 export type OverallEvolution = {
 
   overallAntes: number;
@@ -10,6 +14,10 @@ export type OverallEvolution = {
 
   overallDepois: number;
 
+  jogosAvaliados: number;
+
+  podeEvoluir: boolean;
+
 };
 
 
@@ -20,7 +28,9 @@ export function calculateOverallEvolution(
 
   overallAtual: number,
 
-  notaComunidade: number
+  notaComunidade: number,
+
+  jogosAvaliados: number
 
 ): OverallEvolution {
 
@@ -121,6 +131,12 @@ export function calculateOverallEvolution(
 
 
     overallDepois,
+
+
+    jogosAvaliados,
+
+
+    podeEvoluir: jogosAvaliados >= MIN_AVALIACOES_EVOLUCAO,
 
 
   };
