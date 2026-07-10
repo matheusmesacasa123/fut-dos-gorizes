@@ -19,6 +19,9 @@ import {
 
 import { Button } from "@/components/ui/button";
 
+import { supabase } from "@/lib/supabase";
+
+
 
 export default function DeleteGameButton({
 
@@ -36,43 +39,179 @@ export default function DeleteGameButton({
 
 
 
+
+
+
   async function excluir(){
 
 
-    const response = await fetch(`/api/partidas/${id}`, {
-
-      method:"DELETE",
-
-    });
+    try {
 
 
 
+      const {
+
+        data:{
+          session
+        }
+
+      } = await supabase.auth.getSession();
 
 
-    if(!response.ok){
 
 
-      toast.error("Erro ao excluir partida");
 
-      return;
+
+
+      if(!session){
+
+
+        toast.error(
+          "Usuário não autenticado"
+        );
+
+
+        return;
+
+
+      }
+
+
+
+
+
+
+
+
+      const response = await fetch(
+
+        `/api/partidas/${id}`,
+
+        {
+
+
+          method:"DELETE",
+
+
+
+          headers:{
+
+
+            Authorization:
+
+            `Bearer ${session.access_token}`
+
+
+          }
+
+
+
+        }
+
+      );
+
+
+
+
+
+
+
+
+      if(!response.ok){
+
+
+        const data = await response.json();
+
+
+        console.log(
+
+          "ERRO DELETE PARTIDA:",
+
+          data
+
+        );
+
+
+
+        toast.error(
+
+          data.error ||
+
+          data.message ||
+
+          "Erro ao excluir partida"
+
+        );
+
+
+
+        return;
+
+
+      }
+
+
+
+
+
+
+
+
+
+      toast.success(
+
+        "Partida excluída"
+
+      );
+
+
+
+
+      router.push(
+
+        "/partidas"
+
+      );
+
+
+
+      router.refresh();
+
+
+
+
+    }
+
+    catch(error){
+
+
+
+      console.log(
+
+        "ERRO DELETE:",
+
+        error
+
+      );
+
+
+
+      toast.error(
+
+        "Erro de conexão"
+
+      );
+
 
 
     }
 
 
 
-
-
-    toast.success("Partida excluída");
-
-
-    router.push("/partidas");
-
-
-    router.refresh();
-
-
   }
+
+
+
 
 
 
@@ -85,13 +224,18 @@ export default function DeleteGameButton({
     <AlertDialog>
 
 
+
       <AlertDialogTrigger
+
 
         render={
 
+
           <Button
 
+
             variant="destructive"
+
 
             className="
               h-12
@@ -100,17 +244,24 @@ export default function DeleteGameButton({
               font-black
             "
 
+
           />
+
 
         }
 
+
       >
+
 
 
         <Trash2 size={18} />
 
 
+
         Excluir
+
+
 
 
       </AlertDialogTrigger>
@@ -120,10 +271,14 @@ export default function DeleteGameButton({
 
 
 
+
+
       <AlertDialogContent>
 
 
+
         <AlertDialogHeader>
+
 
 
           <AlertDialogMedia className="text-destructive">
@@ -133,6 +288,9 @@ export default function DeleteGameButton({
 
 
           </AlertDialogMedia>
+
+
+
 
 
 
@@ -150,6 +308,9 @@ export default function DeleteGameButton({
 
 
 
+
+
+
           <AlertDialogDescription>
 
 
@@ -159,6 +320,9 @@ export default function DeleteGameButton({
           </AlertDialogDescription>
 
 
+
+
+
         </AlertDialogHeader>
 
 
@@ -166,7 +330,10 @@ export default function DeleteGameButton({
 
 
 
+
+
         <AlertDialogFooter>
+
 
 
           <AlertDialogCancel>
@@ -181,26 +348,46 @@ export default function DeleteGameButton({
 
 
 
+
+
+
           <AlertDialogAction
+
 
             variant="destructive"
 
+
             onClick={excluir}
 
+
           >
+
 
 
             Excluir
 
 
+
+
           </AlertDialogAction>
+
+
+
+
 
 
         </AlertDialogFooter>
 
 
 
+
+
+
       </AlertDialogContent>
+
+
+
+
 
 
     </AlertDialog>

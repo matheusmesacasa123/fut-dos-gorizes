@@ -1,49 +1,103 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-server";
+
 
 
 interface Params {
 
   params: Promise<{
-    id: string;
+    id:string;
   }>;
 
 }
 
 
 
+
+
+
+
+
+
 // BUSCAR UMA PARTIDA
+
 export async function GET(
-  request: NextRequest,
-  { params }: Params
-) {
 
-  const { id } = await params;
+  request:NextRequest,
+
+  {params}:Params
+
+){
 
 
-  const { data, error } = await supabase
+  const supabase = await createClient();
+
+
+  const {id} = await params;
+
+
+
+
+
+  const {
+
+    data,
+
+    error
+
+  } = await supabase
+
     .from("partidas")
+
     .select("*")
-    .eq("id", Number(id))
+
+    .eq(
+
+      "id",
+
+      Number(id)
+
+    )
+
     .single();
 
 
 
-  if (error) {
+
+
+
+
+  if(error){
+
 
     return NextResponse.json(
-      error,
+
       {
-        status: 404,
+        error:error.message
+      },
+
+      {
+        status:404
       }
+
     );
 
   }
 
 
+
+
+
+
+
   return NextResponse.json(data);
 
+
 }
+
+
+
+
 
 
 
@@ -52,43 +106,89 @@ export async function GET(
 
 
 // EDITAR PARTIDA
+
 export async function PUT(
-  request: NextRequest,
-  { params }: Params
-) {
+
+  request:NextRequest,
+
+  {params}:Params
+
+){
 
 
-  const { id } = await params;
+  const supabase = await createClient();
+
+
+  const {id} = await params;
+
 
   const body = await request.json();
 
 
 
-  const { data, error } = await supabase
+
+
+
+
+  const {
+
+    data,
+
+    error
+
+  } = await supabase
+
     .from("partidas")
+
     .update(body)
-    .eq("id", Number(id))
+
+    .eq(
+
+      "id",
+
+      Number(id)
+
+    )
+
     .select()
+
     .single();
 
 
 
-  if (error) {
+
+
+
+
+  if(error){
+
 
     return NextResponse.json(
-      error,
+
       {
-        status: 500,
+        error:error.message
+      },
+
+      {
+        status:500
       }
+
     );
 
   }
 
 
 
+
+
+
+
   return NextResponse.json(data);
 
+
 }
+
+
 
 
 
@@ -99,36 +199,55 @@ export async function PUT(
 
 
 // EXCLUIR PARTIDA
+
 export async function DELETE(
-  request: NextRequest,
-  { params }: Params
-) {
+
+  request:NextRequest,
+
+  {params}:Params
+
+){
 
 
-  const { id } = await params;
-
-
-
-  // Buscar usuário autenticado
-
-  const {
-    data: {
-      user
-    }
-  } = await supabase.auth.getUser();
+  const supabase = await createClient();
 
 
 
+  const {id} = await params;
 
-  if (!user) {
+
+  const partidaId = Number(id);
+
+
+
+
+
+
+
+  // Pegar token enviado pelo cliente
+
+  const authHeader = request.headers.get(
+    "Authorization"
+  );
+
+
+
+
+
+
+  if(!authHeader){
+
 
     return NextResponse.json(
+
       {
-        error: "Usuário não autenticado"
+        error:"Token não enviado"
       },
+
       {
-        status: 401
+        status:401
       }
+
     );
 
   }
@@ -138,36 +257,114 @@ export async function DELETE(
 
 
 
-  // Verificar se jogador é admin
+
+  const token = authHeader.replace(
+
+    "Bearer ",
+
+    ""
+
+  );
+
+
+
+
+
+
+
 
   const {
-    data: jogador,
-    error: jogadorError
+
+    data:{
+      user
+    },
+
+    error:userError
+
+  } = await supabase.auth.getUser(token);
+
+
+
+
+
+
+
+
+  if(userError || !user){
+
+
+    return NextResponse.json(
+
+      {
+        error:"Usuário não autenticado"
+      },
+
+      {
+        status:401
+      }
+
+    );
+
+  }
+
+
+
+
+
+
+
+
+  // Verificar administrador
+
+  const {
+
+    data:jogador,
+
+    error:jogadorError
+
   } = await supabase
+
     .from("jogadores")
+
     .select("admin")
-    .eq("usuario_id", user.id)
+
+    .eq(
+
+      "usuario_id",
+
+      user.id
+
+    )
+
     .single();
 
 
 
 
 
-  if (
+
+
+
+  if(
+
     jogadorError ||
-    !jogador?.admin
-  ) {
+
+    jogador?.admin !== true
+
+  ){
 
 
     return NextResponse.json(
+
       {
-        error: "Apenas administradores podem excluir partidas"
+        error:"Apenas administradores podem excluir partidas"
       },
-      {
-        status: 403
-      }
-    );
 
+      {
+        status:403
+      }
+
+    );
 
   }
 
@@ -177,30 +374,166 @@ export async function DELETE(
 
 
 
-  // Excluir partida
 
-  const { error } = await supabase
-    .from("partidas")
+
+  // Apagar estatísticas da partida
+
+  const {
+
+    error:estatisticasError
+
+  } = await supabase
+
+    .from("estatisticas_partidas")
+
     .delete()
-    .eq("id", Number(id));
+
+    .eq(
+
+      "partida_id",
+
+      partidaId
+
+    );
 
 
 
-  if (error) {
+
+
+
+
+  if(estatisticasError){
+
 
     return NextResponse.json(
-      error,
+
       {
-        status: 500,
+        error:estatisticasError.message
+      },
+
+      {
+        status:500
       }
+
     );
 
   }
+
+
+
+
+
+
+
+
+
+  // Apagar presenças
+
+  const {
+
+    error:presencasError
+
+  } = await supabase
+
+    .from("presencas")
+
+    .delete()
+
+    .eq(
+
+      "partida_id",
+
+      partidaId
+
+    );
+
+
+
+
+
+
+
+  if(presencasError){
+
+
+    return NextResponse.json(
+
+      {
+        error:presencasError.message
+      },
+
+      {
+        status:500
+      }
+
+    );
+
+  }
+
+
+
+
+
+
+
+
+
+  // Apagar partida
+
+  const {
+
+    error
+
+  } = await supabase
+
+    .from("partidas")
+
+    .delete()
+
+    .eq(
+
+      "id",
+
+      partidaId
+
+    );
+
+
+
+
+
+
+
+
+  if(error){
+
+
+    return NextResponse.json(
+
+      {
+        error:error.message
+      },
+
+      {
+        status:500
+      }
+
+    );
+
+  }
+
+
+
+
+
 
 
 
   return NextResponse.json({
-    success: true,
+
+    success:true
+
   });
+
 
 }
