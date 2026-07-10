@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X } from "lucide-react";
+import { Check, X, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,8 @@ interface Props {
 
   jaConfirmado:boolean;
 
+  partidaConcluida:boolean;
+
 }
 
 
@@ -26,7 +28,9 @@ export default function ConfirmPresenceButton({
 
   partidaId,
 
-  jaConfirmado
+  jaConfirmado,
+
+  partidaConcluida
 
 }:Props){
 
@@ -39,6 +43,7 @@ export default function ConfirmPresenceButton({
 
   const [loading,setLoading] = useState(false);
 
+
   const router = useRouter();
 
 
@@ -50,10 +55,26 @@ export default function ConfirmPresenceButton({
   async function alterarPresenca(){
 
 
+
+    if(partidaConcluida){
+
+      toast.error("Partida encerrada. Presença não pode mais ser alterada.");
+
+      return;
+
+    }
+
+
+
+
+
+
     try{
 
 
       setLoading(true);
+
+
 
 
 
@@ -70,14 +91,17 @@ export default function ConfirmPresenceButton({
 
 
 
-
       if(!session){
+
 
         toast.error("Usuário não autenticado");
 
         return;
 
+
       }
+
+
 
 
 
@@ -135,6 +159,7 @@ export default function ConfirmPresenceButton({
 
 
 
+
       const data = await response.json();
 
 
@@ -145,9 +170,14 @@ export default function ConfirmPresenceButton({
 
       if(!response.ok){
 
-        toast.error(data.message || "Erro ao alterar presença");
+
+        toast.error(
+          data.message || "Erro ao alterar presença"
+        );
+
 
         return;
+
 
       }
 
@@ -158,7 +188,15 @@ export default function ConfirmPresenceButton({
 
 
       setConfirmado(!confirmado);
-      toast.success(confirmado ? "Presença retirada" : "Presença confirmada");
+
+
+      toast.success(
+        confirmado
+        ? "Presença retirada"
+        : "Presença confirmada"
+      );
+
+
 
 
 
@@ -172,16 +210,21 @@ export default function ConfirmPresenceButton({
 
     catch(error){
 
+
       console.log(error);
 
+
       toast.error("Erro de conexão");
+
 
     }
 
 
     finally{
 
+
       setLoading(false);
+
 
     }
 
@@ -198,32 +241,78 @@ export default function ConfirmPresenceButton({
 
   return (
 
+
     <Button
+
 
       className="h-10 w-full cursor-pointer"
 
-      disabled={loading}
+
+      disabled={loading || partidaConcluida}
+
 
       onClick={alterarPresenca}
 
+
+      variant={
+        partidaConcluida
+        ? "secondary"
+        : "default"
+      }
+
+
     >
 
-      {loading ? (
-        "Aguarde..."
-      ) : confirmado ? (
-        <>
-          <X size={18} />
-          Retirar presença
-        </>
-      ) : (
-        <>
-          <Check size={18} />
-          Confirmar presença
-        </>
-      )}
+
+
+      {
+        partidaConcluida ? (
+
+          <>
+
+            <Lock size={18} />
+
+            Partida encerrada
+
+
+          </>
+
+
+        ) : loading ? (
+
+          "Aguarde..."
+
+
+        ) : confirmado ? (
+
+          <>
+
+            <X size={18} />
+
+            Retirar presença
+
+
+          </>
+
+
+        ) : (
+
+          <>
+
+            <Check size={18} />
+
+            Confirmar presença
+
+
+          </>
+
+        )
+      }
+
 
 
     </Button>
+
 
   );
 

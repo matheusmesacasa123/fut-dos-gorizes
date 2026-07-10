@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import {
   CalendarDays,
+  CheckCircle,
   Clock,
   Pencil,
   ShieldCheck,
@@ -48,6 +49,7 @@ type Presenca = {
 
 
 
+
 export default async function PartidaDetalhes({
 
   params,
@@ -71,6 +73,7 @@ export default async function PartidaDetalhes({
 
 
 
+
   if(isNaN(partidaId)){
 
 
@@ -85,6 +88,7 @@ export default async function PartidaDetalhes({
     );
 
   }
+
 
 
 
@@ -120,6 +124,7 @@ export default async function PartidaDetalhes({
 
 
 
+
   if(error || !partida){
 
 
@@ -134,6 +139,7 @@ export default async function PartidaDetalhes({
     );
 
   }
+
 
 
 
@@ -199,6 +205,8 @@ export default async function PartidaDetalhes({
 
 
 
+
+
   let jaConfirmado = false;
 
 
@@ -206,7 +214,39 @@ export default async function PartidaDetalhes({
 
 
   let podeAvaliarPartida = false;
-    if(user){
+
+
+  const agora = new Date();
+
+
+  const inicioPartida = new Date(
+
+    `${partida.data}T${partida.hora}`
+
+  );
+
+
+  const finalPartida = new Date(
+
+    inicioPartida.getTime()
+
+    +
+
+    60 * 60 * 1000
+
+  );
+
+
+  const partidaConcluida = agora >= finalPartida;
+
+
+
+
+
+
+
+
+  if(user){
 
 
     const {
@@ -235,10 +275,12 @@ export default async function PartidaDetalhes({
 
 
 
+
     if(jogador){
 
 
       jogadorIdLogado = jogador.id;
+
 
 
 
@@ -278,6 +320,7 @@ export default async function PartidaDetalhes({
 
 
 
+
       jaConfirmado = !!minhaPresenca;
 
 
@@ -293,47 +336,10 @@ export default async function PartidaDetalhes({
 
 
 
-
-
-
-
-
-  // Libera avaliação 1 hora após o início da partida
-
   if(jogadorIdLogado){
 
 
-    const inicioPartida = new Date(
-
-      `${partida.data}T${partida.hora}`
-
-    );
-
-
-
-
-    const liberaAvaliacao = new Date(
-
-      inicioPartida.getTime()
-
-      +
-
-      60 * 60 * 1000
-
-    );
-
-
-
-
-
-    const agora = new Date();
-
-
-
-
-
-    if(agora >= liberaAvaliacao){
-
+    if(partidaConcluida){
 
 
       const {
@@ -433,7 +439,9 @@ export default async function PartidaDetalhes({
 
         </div>
 
+
         </CardHeader>
+
 
 
 
@@ -487,7 +495,47 @@ export default async function PartidaDetalhes({
 
 
           </p>
-          
+
+
+
+
+
+          {
+            partidaConcluida && (
+
+              <Badge
+
+                variant="secondary"
+
+                className="
+                  mx-auto
+                  flex
+                  w-fit
+                  items-center
+                  gap-2
+                  rounded-lg
+                  px-4
+                  py-2
+                  font-black
+                "
+
+              >
+
+                <CheckCircle size={18} />
+
+                Partida concluída
+
+
+              </Badge>
+
+            )
+          }
+
+
+
+
+
+
 
 
 
@@ -516,11 +564,17 @@ export default async function PartidaDetalhes({
 
 
 
+
+
+
                 <p>
 
                   Valor: R$ {partida.valor_goleiro}
 
                 </p>
+
+
+
 
 
 
@@ -560,6 +614,9 @@ export default async function PartidaDetalhes({
 
 
 
+
+
+
           <div>
 
 
@@ -573,6 +630,9 @@ export default async function PartidaDetalhes({
 
 
 
+
+
+
             <p className="my-4 rounded-lg border border-border bg-secondary/70 py-4 text-5xl font-black">
 
 
@@ -580,6 +640,9 @@ export default async function PartidaDetalhes({
 
 
             </p>
+
+
+
 
 
 
@@ -608,18 +671,14 @@ export default async function PartidaDetalhes({
         <div>
 
 
-          <ConfirmPresenceButton
-
-            partidaId={partida.id}
-
-            jaConfirmado={jaConfirmado}
-
-          />
+<ConfirmPresenceButton
+  partidaId={partida.id}
+  jaConfirmado={jaConfirmado}
+  partidaConcluida={partidaConcluida}
+/>
 
 
         </div>
-
-
 
 
 
@@ -686,7 +745,12 @@ export default async function PartidaDetalhes({
 
 
 
+
+
+
         <Separator />
+
+
 
 
 
@@ -760,6 +824,9 @@ export default async function PartidaDetalhes({
 
 
 
+
+
+
                     <p className="mt-2 flex items-center gap-2 text-muted-foreground">
 
 
@@ -770,6 +837,9 @@ export default async function PartidaDetalhes({
 
 
                     </p>
+
+
+
 
 
 
@@ -828,6 +898,9 @@ export default async function PartidaDetalhes({
 
 
 
+
+
+
         <div className="flex flex-col gap-3 sm:flex-row">
 
 
@@ -864,6 +937,8 @@ export default async function PartidaDetalhes({
 
 
 
+
+
           <div className="flex-1">
 
 
@@ -881,6 +956,7 @@ export default async function PartidaDetalhes({
 
 
         </div>
+
 
 
 
