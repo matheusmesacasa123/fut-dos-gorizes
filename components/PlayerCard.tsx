@@ -84,7 +84,7 @@ export default function PlayerCard({
           </div>
 
           <div
-            className={`absolute inset-x-[10%] top-[53%] z-10 text-center text-[7cqw] font-black uppercase tracking-wide leading-none ${tpl.text}`}
+            className={`absolute inset-x-[10%] top-[55%] z-10 text-center text-[22px] font-black uppercase tracking-wide leading-none ${tpl.text}`}
           >
             {nomeCard}
           </div>
