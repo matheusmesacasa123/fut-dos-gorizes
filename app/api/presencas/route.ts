@@ -1,5 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase-server";
+
+
+
+
+// Verifica se a partida já foi encerrada
+async function verificarPartidaConcluida(
+  partida_id:number
+){
+
+  const supabase = await createClient();
+
+
+  const {
+    data:partida,
+    error
+  } = await supabase
+
+    .from("partidas")
+
+    .select(
+      "data, hora"
+    )
+
+    .eq(
+      "id",
+      partida_id
+    )
+
+    .single();
+
+
+
+
+  if(error || !partida){
+
+    return null;
+
+  }
+
+
+
+
+  const inicioPartida = new Date(
+
+    `${partida.data}T${partida.hora}`
+
+  );
+
+
+
+  const fimPartida = new Date(
+
+    inicioPartida.getTime()
+
+    +
+
+    60 * 60 * 1000
+
+  );
+
+
+
+  return new Date() >= fimPartida;
+
+}
+
+
+
+
 
 
 
@@ -8,32 +78,46 @@ export async function GET(
   request: NextRequest
 ) {
 
+
   const supabase = await createClient();
 
 
   const { searchParams } = new URL(request.url);
 
-  const partida_id = searchParams.get("partida_id");
+
+  const partida_id = searchParams.get(
+    "partida_id"
+  );
 
 
 
   if (!partida_id) {
 
+
     return NextResponse.json(
+
       {
-        message: "Partida não informada"
+        message:"Partida não informada"
       },
+
       {
-        status: 400
+        status:400
       }
+
     );
 
   }
 
 
 
-  const { data, error } = await supabase
+
+  const {
+    data,
+    error
+  } = await supabase
+
     .from("presencas")
+
     .select(`
       id,
       jogador_id,
@@ -43,6 +127,7 @@ export async function GET(
         overall
       )
     `)
+
     .eq(
       "partida_id",
       Number(partida_id)
@@ -50,28 +135,31 @@ export async function GET(
 
 
 
-  if (error) {
+
+  if(error){
+
 
     return NextResponse.json(
+
       {
-        message: error.message
+        message:error.message
       },
+
       {
-        status: 500
+        status:500
       }
+
     );
 
   }
 
 
 
+
   return NextResponse.json(data);
 
+
 }
-
-
-
-
 
 
 
@@ -97,15 +185,19 @@ export async function POST(
 
 
 
-  if (!partida_id) {
+  if(!partida_id){
+
 
     return NextResponse.json(
+
       {
-        message: "Partida não informada"
+        message:"Partida não informada"
       },
+
       {
-        status: 400
+        status:400
       }
+
     );
 
   }
@@ -113,21 +205,30 @@ export async function POST(
 
 
 
-  const authHeader = request.headers.get(
-    "Authorization"
-  );
+
+
+  const partidaEncerrada =
+    await verificarPartidaConcluida(
+      Number(partida_id)
+    );
 
 
 
-  if (!authHeader) {
+
+
+  if(partidaEncerrada){
+
 
     return NextResponse.json(
+
       {
-        message: "Token não enviado"
+        message:"Partida encerrada. Não é possível confirmar presença."
       },
+
       {
-        status: 401
+        status:400
       }
+
     );
 
   }
@@ -135,16 +236,54 @@ export async function POST(
 
 
 
-  const token = authHeader.replace(
-    "Bearer ",
-    ""
-  );
+
+
+
+  const authHeader =
+    request.headers.get(
+      "Authorization"
+    );
+
+
+
+
+
+  if(!authHeader){
+
+
+    return NextResponse.json(
+
+      {
+        message:"Token não enviado"
+      },
+
+      {
+        status:401
+      }
+
+    );
+
+  }
+
+
+
+
+
+
+
+  const token =
+    authHeader.replace(
+      "Bearer ",
+      ""
+    );
+
 
 
 
 
 
   const {
+
     data:{
       user
     },
@@ -157,15 +296,20 @@ export async function POST(
 
 
 
-  if (userError || !user) {
+
+  if(userError || !user){
+
 
     return NextResponse.json(
+
       {
         message:"Usuário não autenticado"
       },
+
       {
         status:401
       }
+
     );
 
   }
@@ -174,33 +318,49 @@ export async function POST(
 
 
 
+
+
   const {
+
     data:jogador,
 
     error:jogadorError
 
   } = await supabase
+
     .from("jogadores")
+
     .select("id")
+
     .eq(
+
       "usuario_id",
+
       user.id
+
     )
+
     .single();
 
 
 
 
 
-  if (jogadorError || !jogador) {
+
+
+  if(jogadorError || !jogador){
+
 
     return NextResponse.json(
+
       {
         message:"Jogador não encontrado"
       },
+
       {
         status:404
       }
+
     );
 
   }
@@ -210,13 +370,18 @@ export async function POST(
 
 
 
+
+
   const {
+
     data,
 
     error
 
   } = await supabase
+
     .from("presencas")
+
     .insert({
 
       partida_id,
@@ -224,8 +389,12 @@ export async function POST(
       jogador_id:jogador.id
 
     })
+
     .select()
+
     .single();
+
+
 
 
 
@@ -233,16 +402,23 @@ export async function POST(
 
   if(error){
 
+
     return NextResponse.json(
+
       {
         message:error.message
       },
+
       {
         status:500
       }
+
     );
 
   }
+
+
+
 
 
 
@@ -252,11 +428,6 @@ export async function POST(
 
 
 }
-
-
-
-
-
 
 
 
@@ -283,13 +454,17 @@ export async function DELETE(
 
   if(!partida_id){
 
+
     return NextResponse.json(
+
       {
         message:"Partida não informada"
       },
+
       {
         status:400
       }
+
     );
 
   }
@@ -298,21 +473,61 @@ export async function DELETE(
 
 
 
-  const authHeader = request.headers.get(
-    "Authorization"
-  );
+
+  const partidaEncerrada =
+    await verificarPartidaConcluida(
+      Number(partida_id)
+    );
+
+
+
+
+
+  if(partidaEncerrada){
+
+
+    return NextResponse.json(
+
+      {
+        message:"Partida encerrada. Não é possível alterar presença."
+      },
+
+      {
+        status:400
+      }
+
+    );
+
+  }
+
+
+
+
+
+
+
+  const authHeader =
+    request.headers.get(
+      "Authorization"
+    );
+
+
 
 
 
   if(!authHeader){
 
+
     return NextResponse.json(
+
       {
         message:"Token não enviado"
       },
+
       {
         status:401
       }
+
     );
 
   }
@@ -321,16 +536,21 @@ export async function DELETE(
 
 
 
-  const token = authHeader.replace(
-    "Bearer ",
-    ""
-  );
+
+
+  const token =
+    authHeader.replace(
+      "Bearer ",
+      ""
+    );
+
 
 
 
 
 
   const {
+
     data:{
       user
     },
@@ -343,15 +563,21 @@ export async function DELETE(
 
 
 
+
+
   if(userError || !user){
 
+
     return NextResponse.json(
+
       {
         message:"Usuário não autenticado"
       },
+
       {
         status:401
       }
+
     );
 
   }
@@ -361,19 +587,30 @@ export async function DELETE(
 
 
 
+
   const {
+
     data:jogador,
 
     error:jogadorError
 
   } = await supabase
+
     .from("jogadores")
+
     .select("id")
+
     .eq(
+
       "usuario_id",
+
       user.id
+
     )
+
     .single();
+
+
 
 
 
@@ -381,13 +618,17 @@ export async function DELETE(
 
   if(jogadorError || !jogador){
 
+
     return NextResponse.json(
+
       {
         message:"Jogador não encontrado"
       },
+
       {
         status:404
       }
+
     );
 
   }
@@ -398,7 +639,10 @@ export async function DELETE(
 
 
 
+
+
   const {
+
     error
 
   } = await supabase
@@ -408,14 +652,22 @@ export async function DELETE(
     .delete()
 
     .eq(
+
       "partida_id",
+
       partida_id
+
     )
 
     .eq(
+
       "jogador_id",
+
       jogador.id
+
     );
+
+
 
 
 
@@ -424,13 +676,17 @@ export async function DELETE(
 
   if(error){
 
+
     return NextResponse.json(
+
       {
         message:error.message
       },
+
       {
         status:500
       }
+
     );
 
   }
@@ -439,10 +695,14 @@ export async function DELETE(
 
 
 
+
+
   return NextResponse.json(
+
     {
       message:"Presença cancelada"
     }
+
   );
 
 
