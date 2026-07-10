@@ -1,17 +1,23 @@
 import { UsersRound } from "lucide-react";
 
 import PlayerCard from "@/components/PlayerCard";
-import { supabase } from "@/lib/supabase";
-
+import { createClient } from "@/lib/supabase/server";
+import { isAdmin } from "@/lib/supabase/auth";
 
 export default async function Jogadores() {
-  const { data: players, error } = await supabase
-    .from("jogadores")
-    .select("*");
+  const supabase = await createClient();
+
+  const { data: players, error } = await supabase.from("jogadores").select("*");
 
   if (error) {
     console.log("ERRO SUPABASE:", JSON.stringify(error, null, 2));
   }
+
+  const admin = true;
+  // await isAdmin();
+
+  console.log("PLAYERS:", players);
+  console.log("É ADMIN:", admin);
 
   return (
     <main className="app-page">
@@ -23,13 +29,14 @@ export default async function Jogadores() {
 
           <div>
             <p className="page-kicker">Elenco</p>
+
             <h1 className="page-title">Jogadores</h1>
           </div>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {players?.map((player) => (
-            <PlayerCard key={player.id} player={player} />
+            <PlayerCard key={player.id} player={player} isAdmin={admin} />
           ))}
         </div>
       </div>
