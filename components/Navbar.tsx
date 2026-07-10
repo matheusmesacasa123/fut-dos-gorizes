@@ -78,13 +78,11 @@ const navItems: NavItem[] = [
   },
 ];
 
-
 export default function Navbar({
   initialUserId = null,
 }: {
   initialUserId?: string | null;
 }) {
-
   const router = useRouter();
   const pathname = usePathname();
 
@@ -93,21 +91,12 @@ export default function Navbar({
   const [nome, setNome] = useState("");
   const [admin, setAdmin] = useState(false);
 
-
-
   useEffect(() => {
-
-
     async function verificarUsuario() {
-
-
       const { data } = await supabase.auth.getUser();
 
-
-      if(data.user){
-
+      if (data.user) {
         setUsuario(data.user.id);
-
 
         const { data: jogador } = await supabase
           .from("jogadores")
@@ -115,82 +104,43 @@ export default function Navbar({
           .eq("usuario_id", data.user.id)
           .single();
 
-
-
-        if(jogador){
-
+        if (jogador) {
           setNome(jogador.nome);
           setAdmin(jogador.admin === true);
-
         }
-
       }
-
-
     }
-
 
     verificarUsuario();
 
-
-
-    const {
-      data: listener
-    } = supabase.auth.onAuthStateChange(
+    const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-
-
         setUsuario(session?.user.id ?? null);
 
-
-
-        if(session?.user){
-
-
+        if (session?.user) {
           const { data: jogador } = await supabase
             .from("jogadores")
             .select("nome, admin")
             .eq("usuario_id", session.user.id)
             .single();
 
-
-
-          if(jogador){
-
+          if (jogador) {
             setNome(jogador.nome);
             setAdmin(jogador.admin === true);
-
           }
-
-
         } else {
-
           setNome("");
           setAdmin(false);
-
         }
-
-
-      }
+      },
     );
 
-
-
     return () => {
-
       listener.subscription.unsubscribe();
-
     };
-
-
   }, []);
 
-
-
-
-
-  async function sair(){
-
+  async function sair() {
     await supabase.auth.signOut();
 
     setUsuario(null);
@@ -198,36 +148,34 @@ export default function Navbar({
 
     router.push("/login");
     router.refresh();
-
   }
 
   // Sem usuário logado, não mostra o header (esconde na hora ao deslogar).
   if (!usuario) return null;
 
   const visibleNavItems = navItems.filter(
-    (item) =>
-      (!item.requiresAuth || usuario) && (!item.requiresAdmin || admin),
+    (item) => (!item.requiresAuth || usuario) && (!item.requiresAdmin || admin),
   );
 
   const linkClassName = (href: string) =>
     cn(
       "h-10 justify-start gap-2 px-3 font-medium text-white/75 hover:bg-white/10 hover:text-white [&_svg]:size-4",
-      pathname === href && "bg-white/10 text-white"
+      pathname === href && "bg-white/10 text-white",
     );
 
   const mobileLinkClassName = (href: string) =>
     cn(
       "flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white [&_svg]:size-4",
-      pathname === href && "bg-white/10 text-white"
+      pathname === href && "bg-white/10 text-white",
     );
 
-  const renderAuthActions = (mobile = false) => (
+  const renderAuthActions = (mobile = false) =>
     usuario ? (
       <>
         <div
           className={cn(
             "inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white/70 [&_svg]:size-4",
-            mobile && "w-full justify-start"
+            mobile && "w-full justify-start",
           )}
         >
           <UserRound className="size-4" />
@@ -239,7 +187,7 @@ export default function Navbar({
           onClick={sair}
           className={cn(
             "h-10 border-white/10 bg-transparent px-3 text-white/75 hover:bg-white/10 hover:text-white",
-            mobile && "w-full justify-start"
+            mobile && "w-full justify-start",
           )}
         >
           <LogOut className="size-4" />
@@ -253,7 +201,7 @@ export default function Navbar({
           render={<Link href="/login" />}
           className={cn(
             "h-10 border-white/15 bg-transparent px-3 text-white/80 hover:bg-white/10 hover:text-white",
-            mobile && "w-full justify-start"
+            mobile && "w-full justify-start",
           )}
         >
           Entrar
@@ -263,28 +211,21 @@ export default function Navbar({
           render={<Link href="/cadastro" />}
           className={cn(
             "h-10 bg-accent px-3 font-bold text-accent-foreground hover:bg-accent/90",
-            mobile && "w-full justify-start"
+            mobile && "w-full justify-start",
           )}
         >
           <Shield className="size-4" />
           Cadastro
         </Button>
       </>
-    )
-  );
-
-
-
+    );
 
   return (
-
-    <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#111111]/95 px-4 py-3 text-white shadow-sm backdrop-blur supports-[backdrop-filter]:bg-[#111111]/85 sm:px-6 lg:px-8">
-
-
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+    <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#111111]/95 px-4 py-3 text-white shadow-sm backdrop-blur supports-backdrop-filter:bg-[#111111]/85 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
         <BrandLogo />
 
-        <div className="hidden items-center gap-1 lg:flex">
+        <div className="hidden items-center gap-1 xl:flex">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
 
@@ -302,7 +243,7 @@ export default function Navbar({
           })}
         </div>
 
-        <div className="hidden items-center gap-2 lg:flex">
+        <div className="hidden items-center gap-2 xl:flex">
           {renderAuthActions()}
         </div>
 
@@ -312,7 +253,7 @@ export default function Navbar({
               <Button
                 variant="outline"
                 size="icon-lg"
-                className="border-white/10 bg-transparent text-white hover:bg-white/10 lg:hidden"
+                className="border-white/10 bg-transparent text-white hover:bg-white/10 xl:hidden"
               />
             }
           >
@@ -320,7 +261,10 @@ export default function Navbar({
             <span className="sr-only">Abrir menu</span>
           </SheetTrigger>
 
-          <SheetContent className="border-white/10 bg-[#111111] text-white" side="right">
+          <SheetContent
+            className="border-white/10 bg-[#111111] text-white"
+            side="right"
+          >
             <SheetHeader>
               <SheetTitle className="sr-only">Menu principal</SheetTitle>
               <BrandLogo />
@@ -337,7 +281,12 @@ export default function Navbar({
                 return (
                   <SheetClose
                     key={item.href}
-                    render={<Link href={item.href} className={mobileLinkClassName(item.href)} />}
+                    render={
+                      <Link
+                        href={item.href}
+                        className={mobileLinkClassName(item.href)}
+                      />
+                    }
                   >
                     <Icon className="size-4" />
                     {item.label}
@@ -350,17 +299,10 @@ export default function Navbar({
               <Separator className="bg-white/10" />
             </div>
 
-            <div className="grid gap-2 px-4">
-              {renderAuthActions(true)}
-            </div>
+            <div className="grid gap-2 px-4">{renderAuthActions(true)}</div>
           </SheetContent>
         </Sheet>
-
       </div>
-
-
     </nav>
-
   );
-
 }

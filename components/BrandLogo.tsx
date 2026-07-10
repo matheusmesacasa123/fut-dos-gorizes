@@ -7,13 +7,13 @@ type BrandLogoProps = {
 
 export default function BrandLogo({ compact = false }: BrandLogoProps) {
   return (
-    <Link href="/" className="group inline-flex items-center gap-3">
+    <Link href="/" className="group inline-flex shrink-0 items-center gap-3">
       <Image
         src="/gurizes-logo.png"
         alt="Gurizes FC"
         width={48}
         height={48}
-        className="size-12 rounded-lg object-contain ring-1 ring-accent/35 transition group-hover:ring-accent"
+        className="size-12 shrink-0 rounded-lg object-contain ring-1 ring-accent/35 transition group-hover:ring-accent"
       />
 
       {!compact && (
