@@ -230,37 +230,41 @@ export default async function PartidaDetalhes({
 
 
 
-  const agora = new Date();
+const agora = new Date();
 
+const [ano, mes, dia] = partida.data.split("-").map(Number);
 
+const [hora, minuto, segundo] = partida.hora
+  .split(":")
+  .map(Number);
 
+const inicioPartida = new Date(
+  ano,
+  mes - 1,
+  dia,
+  hora,
+  minuto,
+  segundo ?? 0
+);
 
+const finalPartida = new Date(
+  inicioPartida.getTime() + 60 * 60 * 1000
+);
 
-  const inicioPartida = new Date(
+console.log("================================");
+console.log("Timezone:", Intl.DateTimeFormat().resolvedOptions().timeZone);
+console.log("Data:", partida.data);
+console.log("Hora:", partida.hora);
+console.log("Agora:", agora.toString());
+console.log("Agora ISO:", agora.toISOString());
+console.log("Início:", inicioPartida.toString());
+console.log("Início ISO:", inicioPartida.toISOString());
+console.log("Fim:", finalPartida.toString());
+console.log("Fim ISO:", finalPartida.toISOString());
+console.log("Concluída?", agora >= finalPartida);
+console.log("================================");
 
-    `${partida.data}T${partida.hora}`
-
-  );
-
-
-
-
-
-  const finalPartida = new Date(
-
-    inicioPartida.getTime()
-
-    +
-
-    60 * 60 * 1000
-
-  );
-
-
-
-
-
-  const partidaConcluida = agora >= finalPartida;
+const partidaConcluida = agora >= finalPartida;
 
     if(user){
 

@@ -220,21 +220,13 @@ export default async function PerfilJogador({
 
 
 
-  const evolucaoOverall =
-
-    avaliacaoComunidade
-
-      ? calculateOverallEvolution(
-
-          player.overall,
-
-          avaliacaoComunidade.notaGeral,
-
-          avaliacaoComunidade.jogosAvaliados
-
-        )
-
-      : null;
+const evolucaoOverall =
+  avaliacaoComunidade
+    ? calculateOverallEvolution(
+        player.overall,
+        avaliacaoComunidade.notaGeral
+      )
+    : null;
         const {
 
     data:{ user },
@@ -516,7 +508,7 @@ export default async function PerfilJogador({
 
 
 
-                {!evolucaoOverall.podeEvoluir ? (
+                {evolucaoOverall.overallDepois === null || evolucaoOverall.overallDepois === undefined ? (
 
                   <div className="rounded-lg bg-background p-6">
 
